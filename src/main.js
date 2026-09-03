@@ -142,7 +142,10 @@ function Sidebar(learner) {
           `).join('')}
         </ul>
       </nav>
-      <div class="profile sidebar-profile"><span class="avatar">${learner.initials}</span><div><strong>${learner.name}</strong><span>${learner.cohort}</span></div></div>
+      <div class="sidebar-footer">
+        <button class="admin-demo-button" type="button" data-admin-demo aria-pressed="false"><span aria-hidden="true">▣</span>운영진 화면 보기</button>
+        <div class="profile sidebar-profile"><span class="avatar">${learner.initials}</span><div><strong>${learner.name}</strong><span>${learner.cohort}</span></div></div>
+      </div>
     </aside>
   `
 }
@@ -333,6 +336,28 @@ function CampCalendarView() {
   `
 }
 
+function AdminDashboard() {
+  const alerts = [
+    { title: '최근 출석률 저조', count: '3명', people: ['김민지 · 최근 72%', '이도윤 · 최근 74%', '최유진 · 최근 76%'], type: '출결' },
+    { title: '마감 후 설문 미제출', count: '2명', people: ['이도윤 · 3주차 운영 설문', '박지후 · 3주차 운영 설문'], type: '설문' },
+    { title: '2일 연속 과제 미제출', count: '2명', people: ['김민지 · Part 3 과제', '정준호 · Part 3 과제'], type: '과제' },
+    { title: '과제 제출률 저조', count: '4명', people: ['김민지 · 제출률 55%', '정준호 · 제출률 61%', '최유진 · 제출률 64%', '박지후 · 제출률 67%'], type: '과제' },
+  ]
+  return `
+    <section class="admin-view" data-admin-view hidden aria-labelledby="admin-title">
+      <header class="page-header admin-page-header"><div><p>AI리더 7기 · 운영 센터</p><h1 id="admin-title">운영 대시보드</h1></div><button class="quiet-button" type="button" data-learner-demo>수강생 화면으로</button></header>
+      <section class="admin-alerts" aria-label="우선 확인 대상">${alerts.map((alert) => `
+        <article class="admin-alert-card"><header><h2>${alert.title}</h2><strong>${alert.count}</strong></header><ul>${alert.people.map((person) => `<li><span>${person}</span><b>${alert.type}</b></li>`).join('')}</ul><button type="button" class="admin-text-button">전체 명단 보기</button></article>
+      `).join('')}</section>
+      <div class="admin-detail-grid">
+        <section class="admin-panel"><header><h2>데이터 반영 기준</h2><button class="admin-text-button" type="button">연동 설정</button></header><ul class="admin-list"><li><span>출결 시트</span><b>어제 23:59 기준</b></li><li><span>과제 현황 시트</span><b>오늘 09:00 기준</b></li><li><span>설문 응답 시트</span><b>오늘 09:00 기준</b></li></ul></section>
+        <section class="admin-panel"><header><h2>바로가기</h2></header><ul class="admin-list"><li><span>캠프 캘린더</span><b>공지 · 설문 · 이벤트 관리</b></li><li><span>수강생 관리</span><b>등록 · 수정 · 삭제</b></li><li><span>챗봇 관리</span><b>블로그 안내 확인</b></li></ul></section>
+      </div>
+      <section class="admin-panel admin-student-panel"><header><h2>수강생 관리</h2><button class="add-button" type="button">+ 수강생 등록</button></header><div class="admin-student-head"><span>수강생</span><span>출석률</span><span>과제 제출률</span><span>설문 제출률</span><span>관리</span></div><div class="admin-student-row"><strong>박서현</strong><span>94%</span><span>81%</span><span>100%</span><button class="admin-text-button" type="button">정보 수정</button></div><div class="admin-student-row is-alert"><strong>김민지</strong><span>72%</span><span>55%</span><span>67%</span><button class="admin-text-button" type="button">수정 · 삭제</button></div><div class="admin-student-row is-alert"><strong>이도윤</strong><span>74%</span><span>71%</span><span>50%</span><button class="admin-text-button" type="button">수정 · 삭제</button></div></section>
+    </section>
+  `
+}
+
 function Dashboard() {
   const { learner, schedule, todo, assignment, attendance } = mockDashboardData
   const noticeCard = Card({
@@ -384,6 +409,7 @@ function Dashboard() {
       <div class="top-grid">${noticeCard}${scheduleCard}${todoCard}</div>
       <div class="bottom-grid">${assignmentCard}${attendanceCard}</div>
       </div>
+      ${AdminDashboard()}
       <section class="faq-view" data-faq-view hidden aria-labelledby="faq-title">
         <header class="page-header faq-header"><div><p>AI리더 지원</p><h1 id="faq-title">FAQ</h1></div><a class="blog-link-button" href="https://oz-ai-leader.blogspot.com/" target="_blank" rel="noreferrer">블로그로 확인하기</a></header>
         <div class="faq-embed-card">
@@ -406,12 +432,29 @@ function attachInteractions() {
       document.querySelector('[data-home-view]').hidden = isFaq || isCalendar
       document.querySelector('[data-faq-view]').hidden = !isFaq
       document.querySelector('[data-calendar-view]').hidden = !isCalendar
+      document.querySelector('[data-admin-view]').hidden = true
+      document.querySelector('[data-admin-demo]').setAttribute('aria-pressed', 'false')
       document.querySelectorAll('[data-dashboard-view]').forEach((item) => {
         const active = item === button
         item.classList.toggle('is-active', active)
         item.setAttribute('aria-current', active ? 'page' : 'false')
       })
     })
+  })
+  document.querySelector('[data-admin-demo]').addEventListener('click', () => {
+    document.querySelector('[data-home-view]').hidden = true
+    document.querySelector('[data-faq-view]').hidden = true
+    document.querySelector('[data-calendar-view]').hidden = true
+    document.querySelector('[data-admin-view]').hidden = false
+    document.querySelectorAll('[data-dashboard-view]').forEach((item) => {
+      item.classList.remove('is-active')
+      item.setAttribute('aria-current', 'false')
+    })
+    document.querySelector('[data-admin-demo]').setAttribute('aria-pressed', 'true')
+  })
+  document.querySelector('[data-learner-demo]').addEventListener('click', () => {
+    const homeButton = document.querySelector('[data-dashboard-view="home"]')
+    homeButton.click()
   })
   document.querySelector('[data-todo-list]').addEventListener('change', (event) => {
     const checkbox = event.target.closest('[data-todo-id]')

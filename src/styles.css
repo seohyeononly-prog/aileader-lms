@@ -65,6 +65,11 @@ h1 { margin: 0; font-size: clamp(27px, 2.3vw, 33px); line-height: 1.2; }
 .sidebar-profile { margin-top: auto; padding: 16px 4px 3px; border-top: 1px solid #e6e0d5; }
 .card-heading > a.quiet-button { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
 .part-blocks i.future, .assignment-legend i.future { background: #dfe0e2; }
+.notice-toggle, .notice-box-button { padding: 0; background: transparent; cursor: pointer; }.notice-toggle:focus-visible, .notice-box-button:focus-visible { outline: 2px solid #6178cf; outline-offset: 2px; }
+.notice-content .notice-toggle, .notice-content .notice-box-button { display: grid; width: 17px; min-width: 17px; height: 17px; flex: none; padding: 0; border: 2px solid #b9b7ae; background: transparent; }
+.notice-content .notice-toggle.is-checked, .notice-content .notice-box-button.is-checked { border-color: #6178cf; background: #6178cf; }
+.notice-box, .notice-content .notice-toggle, .notice-content .notice-box-button, .custom-check { position: relative; box-sizing: border-box; place-items: center; line-height: 0; }
+.notice-box.is-checked::after, .todo-item input:checked + .custom-check::after { position: absolute; inset: 0; display: grid; place-items: center; line-height: 1; transform: translateY(-.5px); }
 .circle-progress-start { z-index: 2; display: block; width: 14px; height: 14px; grid-area: 1 / 1; align-self: start; justify-self: center; border-radius: 50%; background: #6077ce; }
 
 @media (min-width: 1051px) { .schedule-layout { grid-template-rows: minmax(0, 1fr); } }

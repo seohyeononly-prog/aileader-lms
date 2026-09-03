@@ -212,8 +212,10 @@ function renderNotices() {
   if (!list) return
   list.innerHTML = noticeItems.map((notice) => `
     <li>
-      <span class="notice-box ${notice.confirmed ? 'is-checked' : ''}" aria-hidden="true"></span>
-      <button type="button" data-notice-id="${notice.id}"><span>${notice.title}</span><small>${notice.confirmed ? '확인 완료' : notice.action?.type === 'survey' ? '설문 작성' : '내용 보기'}</small></button>
+      ${notice.action?.type === 'survey'
+        ? `<button class="notice-box notice-toggle ${notice.confirmed ? 'is-checked' : ''}" type="button" data-toggle-survey-notice="${notice.id}" role="checkbox" aria-checked="${notice.confirmed}" aria-label="${notice.title} ${notice.confirmed ? '제출 완료' : '제출 미완료'}"></button>`
+        : `<button class="notice-box notice-box-button ${notice.confirmed ? 'is-checked' : ''}" type="button" data-notice-id="${notice.id}" aria-label="${notice.title} 상세 내용 보기"></button>`}
+      <button type="button" data-notice-id="${notice.id}"><span>${notice.title}</span><small>${notice.confirmed ? notice.action?.type === 'survey' ? '제출 완료' : '확인 완료' : notice.action?.type === 'survey' ? '설문 작성' : '내용 보기'}</small></button>
     </li>
   `).join('')
 }
@@ -460,6 +462,13 @@ function attachInteractions() {
     renderTodoItems()
   })
   document.querySelector('[data-notice-list]').addEventListener('click', (event) => {
+    const surveyToggle = event.target.closest('[data-toggle-survey-notice]')
+    if (surveyToggle) {
+      const noticeId = Number(surveyToggle.dataset.toggleSurveyNotice)
+      noticeItems = noticeItems.map((notice) => notice.id === noticeId ? { ...notice, confirmed: !notice.confirmed } : notice)
+      renderNotices()
+      return
+    }
     const noticeButton = event.target.closest('[data-notice-id]')
     if (noticeButton) openNoticeAction(Number(noticeButton.dataset.noticeId))
   })

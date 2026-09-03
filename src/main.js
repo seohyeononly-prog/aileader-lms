@@ -43,6 +43,9 @@ const mockDashboardData = {
   },
   attendance: {
     rate: 94,
+    // This will be replaced with the attendance API value. The flower character
+    // always reflects absences during the most recent five attendance days.
+    recentFiveDayAbsences: 1,
     periods: [
       { label: '1단위기간', rate: 100 },
       { label: '2단위기간', rate: 67 },
@@ -159,6 +162,19 @@ function ProgressBar({ value, label }) {
         <span class="progress-fill" style="width: ${safeValue}%"></span>
       </div>
       <span class="progress-value">${value === null ? '-' : `${value}%`}</span>
+    </div>
+  `
+}
+
+function AttendanceFlower({ absences }) {
+  const normalizedAbsences = Math.max(0, Number(absences) || 0)
+  const petalsByAbsence = { 0: 5, 1: 4, 2: 3, 3: 2 }
+  const petals = petalsByAbsence[normalizedAbsences] ?? 0
+
+  return `
+    <div class="attendance-character">
+      <img src="./public/flower-characters/flower-petals-${petals}.png" alt="최근 5일 출석 상태를 나타내는 꽃잎이 캐릭터" />
+      <span>최근 5일 나의 꽃잎이</span>
     </div>
   `
 }
@@ -391,14 +407,12 @@ function Dashboard() {
       </div>
     `,
   })
-  const attendanceCard = Card({
-    title: '나의 출석률',
-    className: 'metric-card attendance-card',
-    action: '<button class="quiet-button" type="button">출결 내역</button>',
-    content: `
-      <div class="attendance-content"><div class="attendance-rate"><strong>${attendance.rate}%</strong><span>최근 1주 새싹이</span></div><div class="attendance-bars">${attendance.periods.map((period) => ProgressBar({ value: period.rate, label: period.label })).join('')}</div></div>
-    `,
-  })
+  const attendanceCard = `
+    <section class="card metric-card attendance-card" aria-labelledby="attendance-title">
+      <div class="card-heading attendance-heading"><h2 id="attendance-title">나의 출석률 <strong>${attendance.rate}%</strong></h2><button class="quiet-button" type="button">출결 내역</button></div>
+      <div class="attendance-content">${AttendanceFlower({ absences: attendance.recentFiveDayAbsences })}<div class="attendance-bars">${attendance.periods.map((period) => ProgressBar({ value: period.rate, label: period.label })).join('')}</div></div>
+    </section>
+  `
   return `
     ${Sidebar(learner)}
     <main id="home" class="dashboard">
